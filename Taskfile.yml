@@ -99,6 +99,38 @@ tasks:
           echo "✗ MQTT certificates: NOT FOUND (run: task setup:certs)"
         fi
 
+  setup:org:
+    desc: Create default organization (requires services running)
+    silent: true
+    cmds:
+      - |
+        NGINX_PORT=$(docker compose port nginx 80 | cut -d: -f2)
+        if [ -z "$NGINX_PORT" ]; then
+          echo "✗ Services not running (run: docker compose up --detach)"
+          exit 1
+        fi
+        TOKEN=$(curl -s -X POST "http://localhost:${NGINX_PORT}/api/v1/auth/login" \
+          -H "Content-Type: application/json" \
+          -d '{"username":"global-admin@os2iot.dk","password":"hunter2"}' | jq -r '.accessToken')
+        if [ "$TOKEN" = "null" ] || [ -z "$TOKEN" ]; then
+          echo "✗ Failed to login - ensure services are running"
+          exit 1
+        fi
+        RESULT=$(curl -s -X POST "http://localhost:${NGINX_PORT}/api/v1/organization" \
+          -H "Authorization: Bearer $TOKEN" \
+          -H "Content-Type: application/json" \
+          -d '{"name":"Default Organization"}')
+        if echo "$RESULT" | grep -q '"id"'; then
+          echo "✓ Default Organization created"
+        else
+          echo "Organization may already exist or error: $RESULT"
+        fi
+
+  status:
+    desc: Show status of all containers
+    cmds:
+      - docker compose ps --format 'table {{"{{"}}.Name{{"}}"}}	{{"{{"}}.Status{{"}}"}}'
+
   build:
     desc: Build all images without starting
     cmds:

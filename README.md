@@ -21,7 +21,7 @@ From the `OS2IoT-docker` folder in a suitable terminal use:
 docker compose up --detach
 ```
 
-### Using Task Runner (Recommended)
+### Quick Start with Task Runner (Recommended)
 
 This project includes a [Taskfile](https://taskfile.dev/) to simplify common operations. Install go-task first:
 
@@ -35,11 +35,35 @@ sudo snap install task --classic
 # Other methods: https://taskfile.dev/installation/
 ```
 
-Then run `task --list` to see available commands:
+**Full setup from scratch:**
 
 ```bash
-task setup          # Clone sibling repos and fix line endings
+# 1. Clone repos, fix line endings, and generate certificates
+task setup
+
+# 2. Build and start all services
+docker compose up --build --detach
+
+# 3. Wait for services to be healthy (check with: docker compose ps)
+#    The backend may take a minute to initialize the database
+
+# 4. Create default organization (required for frontend to work)
+task setup:org
+
+# 5. Open the frontend in browser
+task open
+```
+
+**Default login credentials:**
+- Email: `global-admin@os2iot.dk`
+- Password: `hunter2`
+
+**Available tasks:**
+
+```bash
+task setup          # Clone sibling repos, fix line endings, generate certs
 task setup:check    # Verify setup status
+task setup:org      # Create default organization (requires services running)
 task build          # Build all Docker images
 task clean          # Remove containers, volumes, and images
 task open           # Open frontend in browser
