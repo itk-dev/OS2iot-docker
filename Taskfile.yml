@@ -14,10 +14,11 @@ tasks:
 
   # Setup tasks
   setup:
-    desc: Run all setup steps (clone repos, fix line endings)
+    desc: Run all setup steps (clone repos, fix line endings, generate certs)
     cmds:
       - task: setup:clone-repos
       - task: setup:fix-line-endings
+      - task: setup:certs
       - task: setup:check
 
   setup:clone-repos:
@@ -53,6 +54,28 @@ tasks:
           echo "dos2unix not installed - skipping (install with: apt install dos2unix)"
         fi
 
+  setup:certs:
+    desc: Generate MQTT broker certificates (CA and server)
+    silent: true
+    dir: configuration/mosquitto-broker-os2iot
+    cmds:
+      - |
+        if [ -f "ca.crt" ] && [ -f "ca.key" ] && [ -f "server.crt" ] && [ -f "server.key" ]; then
+          echo "Certificates already exist"
+        else
+          # Remove directories if they exist (created by Docker when files were missing)
+          rm -rf ca.crt ca.key server.crt server.key ca.srl server.csr 2>/dev/null || true
+          echo "Generating CA certificate..."
+          openssl genrsa -out ca.key 2048
+          openssl req -new -x509 -days 3650 -key ca.key -out ca.crt -subj "/CN=OS2IoT-CA"
+          echo "Generating server certificate..."
+          openssl genrsa -out server.key 2048
+          openssl req -new -key server.key -out server.csr -subj "/CN=mosquitto-os2iot"
+          openssl x509 -req -in server.csr -CA ca.crt -CAkey ca.key -CAcreateserial -out server.crt -days 3650
+          rm -f server.csr
+          echo "Certificates generated successfully"
+        fi
+
   setup:check:
     desc: Verify sibling repos exist and show status
     silent: true
@@ -68,6 +91,11 @@ tasks:
           echo "✓ OS2IoT-frontend: found"
         else
           echo "✗ OS2IoT-frontend: NOT FOUND (run: task setup:clone-repos)"
+        fi
+        if [ -f "configuration/mosquitto-broker-os2iot/ca.crt" ] && [ -f "configuration/mosquitto-broker-os2iot/ca.key" ]; then
+          echo "✓ MQTT certificates: found"
+        else
+          echo "✗ MQTT certificates: NOT FOUND (run: task setup:certs)"
         fi
 
   build:
