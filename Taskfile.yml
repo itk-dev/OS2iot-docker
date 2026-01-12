@@ -112,4 +112,4 @@ tasks:
   open:
     desc: Open the frontend in browser
     cmds:
-      - open http://$(docker compose port os2iot-frontend 8081)
+      - open http://$(docker compose port nginx 80)
