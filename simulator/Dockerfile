@@ -13,8 +13,8 @@ WORKDIR /app
 RUN git clone --depth 1 --branch ${LWN_SIMULATOR_VERSION} https://github.com/UniCT-ARSLab/LWN-Simulator.git . \
     && make install-dep
 
-# Create non-root user
-RUN useradd -r -s /sbin/nologin simulator \
+# Create non-root user with home directory for Go cache
+RUN useradd -r -m -s /sbin/nologin simulator \
     && chown -R simulator:simulator /app
 
 USER simulator

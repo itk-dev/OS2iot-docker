@@ -54,8 +54,8 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
 # Copy Mosquitto from builder
 COPY --from=builder /build/mosquitto-install/usr/local/ /usr/local/
 
-# Copy go-auth plugin
-COPY --from=builder /build/mosquitto-go-auth/go-auth.so /usr/local/lib/
+# Copy go-auth plugin to expected location
+COPY --from=builder /build/mosquitto-go-auth/go-auth.so /home/mosquitto-go-auth/go-auth.so
 
 # Update library cache
 RUN ldconfig

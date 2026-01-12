@@ -73,6 +73,7 @@ tasks:
           openssl req -new -key server.key -out server.csr -subj "/CN=mosquitto-os2iot"
           openssl x509 -req -in server.csr -CA ca.crt -CAkey ca.key -CAcreateserial -out server.crt -days 3650
           rm -f server.csr
+          chmod 644 ca.key server.key
           echo "Certificates generated successfully"
         fi
 

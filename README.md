@@ -18,7 +18,7 @@ OS2IoT
 From the `OS2IoT-docker` folder in a suitable terminal use:
 
 ```
-docker compose up
+docker compose up --detach
 ```
 
 ### Using Task Runner (Recommended)
