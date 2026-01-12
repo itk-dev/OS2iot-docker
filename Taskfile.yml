@@ -126,6 +126,67 @@ tasks:
           echo "Organization may already exist or error: $RESULT"
         fi
 
+  setup:chirpstack:
+    desc: Configure ChirpStack API key for LoRaWAN integration
+    silent: true
+    cmds:
+      - |
+        CHIRPSTACK_PORT=$(docker compose port chirpstack 8080 2>/dev/null | cut -d: -f2)
+        if [ -z "$CHIRPSTACK_PORT" ]; then
+          echo "✗ ChirpStack not running (run: docker compose up --detach)"
+          exit 1
+        fi
+        echo "=== ChirpStack API Key Setup ==="
+        echo ""
+        echo "1. Opening ChirpStack UI at http://localhost:${CHIRPSTACK_PORT}"
+        echo "2. Login with: admin / admin"
+        echo "3. Go to: API Keys (in the left menu)"
+        echo "4. Click 'Add API key'"
+        echo "5. Give it a name and click 'Submit'"
+        echo "6. Copy the generated token"
+        echo ""
+        # Try to open in browser
+        if command -v xdg-open &> /dev/null; then
+          xdg-open "http://localhost:${CHIRPSTACK_PORT}" 2>/dev/null &
+        elif command -v open &> /dev/null; then
+          open "http://localhost:${CHIRPSTACK_PORT}" 2>/dev/null &
+        fi
+        echo "Paste your API key here (or press Ctrl+C to cancel):"
+        read -r API_KEY
+        if [ -n "$API_KEY" ]; then
+          if [ -f ".env" ]; then
+            if grep -q "^CHIRPSTACK_API_KEY=" .env; then
+              sed -i.bak "s/^CHIRPSTACK_API_KEY=.*/CHIRPSTACK_API_KEY=${API_KEY}/" .env && rm -f .env.bak
+              echo "✓ Updated CHIRPSTACK_API_KEY in .env"
+            else
+              echo "CHIRPSTACK_API_KEY=${API_KEY}" >> .env
+              echo "✓ Added CHIRPSTACK_API_KEY to .env"
+            fi
+          else
+            echo "CHIRPSTACK_API_KEY=${API_KEY}" > .env
+            echo "✓ Created .env with CHIRPSTACK_API_KEY"
+          fi
+          echo ""
+          echo "Restarting backend to apply changes..."
+          docker compose up -d os2iot-backend
+          echo "✓ Done! Backend restarted with new API key"
+        else
+          echo "✗ No API key provided"
+        fi
+
+  open:chirpstack:
+    desc: Open ChirpStack UI in browser
+    cmds:
+      - |
+        URL="http://$(docker compose port chirpstack 8080)"
+        if command -v xdg-open &> /dev/null; then
+          xdg-open "$URL"
+        elif command -v open &> /dev/null; then
+          open "$URL"
+        else
+          echo "Open in browser: $URL"
+        fi
+
   status:
     desc: Show status of all containers
     cmds:
@@ -144,4 +205,12 @@ tasks:
   open:
     desc: Open the frontend in browser
     cmds:
-      - open http://$(docker compose port nginx 80)
+      - |
+        URL="http://$(docker compose port nginx 80)"
+        if command -v xdg-open &> /dev/null; then
+          xdg-open "$URL"
+        elif command -v open &> /dev/null; then
+          open "$URL"
+        else
+          echo "Open in browser: $URL"
+        fi
