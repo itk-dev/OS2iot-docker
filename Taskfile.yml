@@ -1,0 +1,86 @@
+version: '3'
+
+vars:
+  PARENT_DIR: '{{.ROOT_DIR}}/..'
+  BACKEND_DIR: '{{.PARENT_DIR}}/OS2IoT-backend'
+  FRONTEND_DIR: '{{.PARENT_DIR}}/OS2IoT-frontend'
+
+tasks:
+  default:
+    desc: Show available tasks
+    cmds:
+      - task --list
+    silent: true
+
+  # Setup tasks
+  setup:
+    desc: Run all setup steps (clone repos, fix line endings)
+    cmds:
+      - task: setup:clone-repos
+      - task: setup:fix-line-endings
+      - task: setup:check
+
+  setup:clone-repos:
+    desc: Clone OS2IoT-backend and OS2IoT-frontend to sibling directories
+    silent: true
+    cmds:
+      - |
+        if [ ! -d "{{.BACKEND_DIR}}" ]; then
+          echo "Cloning OS2IoT-backend..."
+          git clone https://github.com/OS2iot/OS2IoT-backend.git "{{.BACKEND_DIR}}"
+        else
+          echo "OS2IoT-backend already exists"
+        fi
+      - |
+        if [ ! -d "{{.FRONTEND_DIR}}" ]; then
+          echo "Cloning OS2IoT-frontend..."
+          git clone https://github.com/OS2iot/OS2IoT-frontend.git "{{.FRONTEND_DIR}}"
+        else
+          echo "OS2IoT-frontend already exists"
+        fi
+
+  setup:fix-line-endings:
+    desc: Fix line endings on database init scripts (for Windows/cross-platform)
+    silent: true
+    cmds:
+      - |
+        if command -v dos2unix &> /dev/null; then
+          dos2unix configuration/os2iot-postgresql/initdb/*.sh 2>/dev/null || true
+          dos2unix configuration/postgresChirpstackV4/initdb/*.sh 2>/dev/null || true
+          dos2unix configuration/postgresql/initdb/*.sh 2>/dev/null || true
+          echo "Line endings fixed"
+        else
+          echo "dos2unix not installed - skipping (install with: apt install dos2unix)"
+        fi
+
+  setup:check:
+    desc: Verify sibling repos exist and show status
+    silent: true
+    cmds:
+      - |
+        echo "=== Setup Status ==="
+        if [ -d "{{.BACKEND_DIR}}" ]; then
+          echo "✓ OS2IoT-backend: found"
+        else
+          echo "✗ OS2IoT-backend: NOT FOUND (run: task setup:clone-repos)"
+        fi
+        if [ -d "{{.FRONTEND_DIR}}" ]; then
+          echo "✓ OS2IoT-frontend: found"
+        else
+          echo "✗ OS2IoT-frontend: NOT FOUND (run: task setup:clone-repos)"
+        fi
+
+  build:
+    desc: Build all images without starting
+    cmds:
+      - docker compose build
+
+  clean:
+    desc: Remove all containers, volumes, and images for this project
+    cmds:
+      - docker compose down --volumes --rmi local
+
+  open:
+    desc: Open the frontend in browser
+    cmds:
+      - open http://$(docker compose port os2iot-frontend 8081)
