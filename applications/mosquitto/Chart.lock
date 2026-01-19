@@ -1,0 +1,9 @@
+dependencies:
+- name: mosquitto
+  repository: file://../../helm/charts/mosquitto
+  version: 0.1.2
+- name: mosquitto-os2iot
+  repository: file://../../helm/charts/mosquitto-os2iot
+  version: 0.1.2
+digest: sha256:aede63a789b341782cdd12d4926b77c925e0e4e081c259ea94095337bd3a269a
+generated: "2026-01-19T11:16:52.811076029+01:00"

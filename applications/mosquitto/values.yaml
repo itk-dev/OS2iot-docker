@@ -1,0 +1,23 @@
+global:
+  imageRegistry: ""
+  imagePullPolicy: IfNotPresent
+
+mosquitto:
+  replicas: 1
+  resources:
+    requests:
+      cpu: 50m
+      memory: 64Mi
+    limits:
+      cpu: 200m
+      memory: 128Mi
+
+mosquitto-os2iot:
+  replicas: 1
+  resources:
+    requests:
+      cpu: 50m
+      memory: 64Mi
+    limits:
+      cpu: 200m
+      memory: 128Mi

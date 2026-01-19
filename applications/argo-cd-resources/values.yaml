@@ -1,0 +1,35 @@
+repoUrl: https://github.com/OS2iot/OS2iot-docker.git
+targetRevision: HEAD
+
+apps:
+  # Core OS2IoT stack
+  - name: os2iot
+    project: os2iot
+    namespace: os2iot
+    path: applications/os2iot
+    automated: false
+    valueFiles:
+      - values.yaml
+    syncOptions:
+      - CreateNamespace=true
+      - ServerSideApply=true
+
+  # ChirpStack v4
+  - name: chirpstack
+    project: chirpstack
+    namespace: chirpstack
+    path: applications/chirpstack
+    automated: false
+    valueFiles:
+      - values.yaml
+    syncOptions:
+      - CreateNamespace=true
+
+  # MQTT Brokers
+  - name: mosquitto
+    project: os2iot
+    namespace: os2iot
+    path: applications/mosquitto
+    automated: false
+    valueFiles:
+      - values.yaml

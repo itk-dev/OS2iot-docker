@@ -1,34 +1,5 @@
 services:
-  #Chirpstack
-  chirpstack-network-server:
-    image: chirpstack/chirpstack-network-server:3.16.8
-    volumes:
-      - ./configuration/chirpstack-network-server:/etc/chirpstack-network-server
-    depends_on:
-      postgresql:
-        condition: service_healthy
-      redis:
-        condition: service_healthy
-      mosquitto:
-        condition: service_healthy
-
-  chirpstack-application-server:
-    image: chirpstack/chirpstack-application-server:3.17.9
-    ports:
-      - "8084"
-    volumes:
-      - ./configuration/chirpstack-application-server:/etc/chirpstack-application-server
-    depends_on:
-      postgresql:
-        condition: service_healthy
-      redis:
-        condition: service_healthy
-    healthcheck:
-      test: ["CMD-SHELL", "wget -q -O /dev/null http://127.0.0.1:8080 || exit 1"]
-      interval: 10s
-      timeout: 5s
-      retries: 5
-
+  # ChirpStack v4
   chirpstack-gateway-bridge:
     image: chirpstack/chirpstack-gateway-bridge:4.0.10
     ports:
@@ -47,7 +18,7 @@ services:
     ports:
       - "8080"
     depends_on:
-      postgresChirpstackV4:
+      chirpstack-postgresql:
         condition: service_healthy
       redis:
         condition: service_healthy
@@ -59,30 +30,15 @@ services:
       timeout: 5s
       retries: 5
 
-  postgresql:
-    image: postgres:9.6-alpine
-    environment:
-      - POSTGRES_PASSWORD=root
-    ports:
-      - "5434"
-    volumes:
-      - ./configuration/postgresql/initdb:/docker-entrypoint-initdb.d
-      - postgresqldata:/var/lib/postgresql/data
-    healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U postgres"]
-      interval: 10s
-      timeout: 5s
-      retries: 5
-
-  postgresChirpstackV4:
+  chirpstack-postgresql:
     image: postgres:bookworm
     volumes:
-      - ./configuration/postgresChirpstackV4/initdb:/docker-entrypoint-initdb.d
-      - postgresqldata:/var/lib/postgresChirpstackV4/data
+      - ./configuration/chirpstack-postgresql/initdb:/docker-entrypoint-initdb.d
+      - chirpstack-postgresqldata:/var/lib/postgresql
     environment:
-      - POSTGRES_PASSWORD=root
+      - POSTGRES_PASSWORD=${CHIRPSTACK_POSTGRES_PASSWORD:-root}
     ports:
-      - "5432"
+      - "5435"
     healthcheck:
       test: ["CMD-SHELL", "pg_isready -U postgres"]
       interval: 10s
@@ -288,7 +244,7 @@ services:
 
 volumes:
   pg-data:
-  postgresqldata:
+  chirpstack-postgresqldata:
   redisdata:
   os2iot-kafkadata:
   os2iot-zookeeperdata:

@@ -4,3 +4,12 @@ ca.key
 server.crt
 server.key
 server.csr
+.env
+
+# Secrets protection (AarhusAI pattern)
+**/secret.yaml
+**/*secret*.yaml
+**/local-secrets/*
+!**/local-secrets/*.template
+!**/*sealed*.yaml
+*.pem

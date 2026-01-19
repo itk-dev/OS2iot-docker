@@ -2,6 +2,8 @@ kind: Deployment
 apiVersion: apps/v1
 metadata:
   name: {{ $.Chart.Name }}
+  annotations:
+    argocd.argoproj.io/sync-wave: "3"
   labels:
     helm.sh/chart: "{{ $.Chart.Name }}-{{ $.Chart.Version }}"
     app.kubernetes.io/name: {{ $.Chart.Name }}
@@ -56,4 +58,16 @@ spec:
               value: "{{ $.Values.KAFKA_ZOOKEEPER_CONNECT }}"
             - name: ALLOW_PLAINTEXT_LISTENER
               value: "{{ $.Values.ALLOW_PLAINTEXT_LISTENER }}"
+          readinessProbe:
+            tcpSocket:
+              port: 9092
+            initialDelaySeconds: 30
+            periodSeconds: 10
+            timeoutSeconds: 5
+          livenessProbe:
+            tcpSocket:
+              port: 9092
+            initialDelaySeconds: 60
+            periodSeconds: 20
+            timeoutSeconds: 5
       restartPolicy: Always

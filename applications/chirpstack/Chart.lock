@@ -1,0 +1,9 @@
+dependencies:
+- name: chirpstack
+  repository: file://../../helm/charts/chirpstack
+  version: 0.1.2
+- name: chirpstack-gateway-bridge
+  repository: file://../../helm/charts/chirpstack-gateway-bridge
+  version: 0.1.2
+digest: sha256:2eed4ef887ccd1dee44bd2ff4ab761d087263271dadd47f37a77dde9b8a77c33
+generated: "2026-01-19T11:16:47.719740022+01:00"

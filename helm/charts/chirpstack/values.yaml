@@ -16,3 +16,24 @@ REPLICAS: 1
 
 # How much revision history should be stored? (can clog up etcd)
 REVISION_HISTORY_LIMIT: 3
+
+# ChirpStack configuration
+# Override these in your values file or via --set
+postgresql:
+  # DSN connection string - CHANGE IN PRODUCTION
+  # dsn: "postgres://chirpstack:YOUR_PASSWORD@chirpstack-postgres/chirpstack?sslmode=disable"
+
+redis:
+  # server: "redis://redis:6379"
+
+network:
+  net_id: "000000"
+  # adr_plugins: '[]'
+  # enabled_regions: '["eu868"]'
+
+api:
+  bind: "0.0.0.0:8080"
+  # jwt_secret: "change-me-in-production"
+
+mqtt:
+  # server: "tcp://mosquitto:1883"

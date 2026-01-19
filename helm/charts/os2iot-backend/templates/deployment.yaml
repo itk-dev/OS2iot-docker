@@ -2,6 +2,8 @@ kind: Deployment
 apiVersion: apps/v1
 metadata:
   name: {{ $.Chart.Name }}
+  annotations:
+    argocd.argoproj.io/sync-wave: "7"
   labels:
     helm.sh/chart: "{{ $.Chart.Name }}-{{ $.Chart.Version }}"
     app.kubernetes.io/name: {{ $.Chart.Name }}
@@ -47,51 +49,76 @@ spec:
             initialDelaySeconds: 30
             periodSeconds: 3
           env:
+            # Service discovery
             - name: DATABASE_HOSTNAME
-              value: os2iot-postgres-svc
+              value: {{ .Values.DATABASE_HOSTNAME | default "os2iot-postgres-svc" }}
             - name: DATABASE_PORT
               value: '5432'
             - name: KAFKA_HOSTNAME
-              value: os2iot-kafka-svc
+              value: {{ .Values.KAFKA_HOSTNAME | default "os2iot-kafka-svc" }}
             - name: KAFKA_PORT
               value: '9092'
             - name: CHIRPSTACK_HOSTNAME
-              value: chirpstack-svc
+              value: {{ .Values.CHIRPSTACK_HOSTNAME | default "chirpstack-svc" }}
             - name: CHIRPSTACK_PORT
-              value: 8084
+              value: '8080'
             - name: CS_MQTT_HOSTNAME
-              value: mosquitto-svc
+              value: {{ .Values.CS_MQTT_HOSTNAME | default "mosquitto-svc" }}
             - name: CS_MQTT_PORT
               value: '1883'
-            - name: BACKEND_BASEURL
-              value: 'https://test-os2iot-backend.os2iot.dk'
-            - name: KOMBIT_CERTIFICATEPRIVATEKEY
-              value: "{{ .Values.KOMBIT_CERTIFICATEPRIVATEKEY }}"
-            - name: KOMBIT_ENTRYPOINT
-              value: "{{ .Values.KOMBIT_ENTRYPOINT }}"
-            - name: LOG_LEVEL
-              value: error
-            - name: EMAIL_PORT
-              value: '587'
-            - name: EMAIL_HOST
-              value: smtp.ethereal.email
-            - name: EMAIL_USER
-              value: some-login-email@somehost.dk
-            - name: EMAIL_PASS
-              value: some-login-pass
-            - name: EMAIL_FROM
-              value: some-from-email@somehost.dk
-            - name: MQTT_SUPER_USER_PASSWORD 
-              value: some-super-user-password
             - name: MQTT_BROKER_HOSTNAME
-              value: some-mqtt-broker-hostname
+              value: {{ .Values.MQTT_BROKER_HOSTNAME | default "mosquitto-os2iot-svc" }}
+            - name: BACKEND_BASEURL
+              value: {{ .Values.BACKEND_BASEURL | default "https://os2iot-backend.os2iot.dk" | quote }}
+            # Configuration
+            - name: KOMBIT_ENTRYPOINT
+              value: {{ .Values.KOMBIT_ENTRYPOINT | default "" | quote }}
+            - name: LOG_LEVEL
+              value: {{ .Values.LOG_LEVEL | default "error" }}
+            - name: EMAIL_PORT
+              value: {{ .Values.EMAIL_PORT | default "587" | quote }}
+            - name: EMAIL_HOST
+              value: {{ .Values.EMAIL_HOST | default "smtp.ethereal.email" }}
+            - name: EMAIL_FROM
+              value: {{ .Values.EMAIL_FROM | default "" | quote }}
+            # Secrets from secretKeyRef
+            - name: EMAIL_USER
+              valueFrom:
+                secretKeyRef:
+                  name: {{ .Values.secretName | default "os2iot-secrets" }}
+                  key: EMAIL_USER
+            - name: EMAIL_PASS
+              valueFrom:
+                secretKeyRef:
+                  name: {{ .Values.secretName | default "os2iot-secrets" }}
+                  key: EMAIL_PASS
+            - name: MQTT_SUPER_USER_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: {{ .Values.secretName | default "os2iot-secrets" }}
+                  key: MQTT_SUPER_USER_PASSWORD
             - name: ENCRYPTION_SYMMETRIC_KEY
-              value: some-encryption-symmetric-key
+              valueFrom:
+                secretKeyRef:
+                  name: {{ .Values.secretName | default "os2iot-secrets" }}
+                  key: ENCRYPTION_SYMMETRIC_KEY
             - name: CA_KEY_PASSWORD
-              value: some-ca-key-password
+              valueFrom:
+                secretKeyRef:
+                  name: {{ .Values.secretName | default "os2iot-secrets" }}
+                  key: CA_KEY_PASSWORD
             - name: CHIRPSTACK_API_KEY
-              value: apikey
-           volumeMounts:
+              valueFrom:
+                secretKeyRef:
+                  name: {{ .Values.secretName | default "os2iot-secrets" }}
+                  key: CHIRPSTACK_API_KEY
+            - name: KOMBIT_CERTIFICATEPRIVATEKEY
+              valueFrom:
+                secretKeyRef:
+                  name: {{ .Values.secretName | default "os2iot-secrets" }}
+                  key: KOMBIT_CERTIFICATEPRIVATEKEY
+                  optional: true
+          volumeMounts:
             - name: secret-ca-crt
               mountPath: /tmp/os2iot/backend/resources
               readOnly: true

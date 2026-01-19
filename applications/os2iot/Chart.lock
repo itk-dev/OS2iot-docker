@@ -1,0 +1,21 @@
+dependencies:
+- name: os2iot-backend
+  repository: file://../../helm/charts/os2iot-backend
+  version: 0.1.2
+- name: os2iot-frontend
+  repository: file://../../helm/charts/os2iot-frontend
+  version: 0.1.2
+- name: os2iot-postgres
+  repository: file://../../helm/charts/os2iot-postgresql
+  version: 0.1.2
+- name: os2iot-kafka
+  repository: file://../../helm/charts/os2iot-kafka
+  version: 0.1.2
+- name: os2iot-zookeeper
+  repository: file://../../helm/charts/os2iot-zookeeper
+  version: 0.1.2
+- name: redis
+  repository: file://../../helm/charts/redis
+  version: 0.1.2
+digest: sha256:b3d69c8e817e79896a5a6712c3b3b028226eca81a971434427e69faba2e5bc96
+generated: "2026-01-19T11:14:51.508391411+01:00"

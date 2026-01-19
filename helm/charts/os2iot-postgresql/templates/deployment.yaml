@@ -2,6 +2,8 @@ kind: Deployment
 apiVersion: apps/v1
 metadata:
   name: {{ $.Chart.Name }}
+  annotations:
+    argocd.argoproj.io/sync-wave: "1"
   labels:
     helm.sh/chart: "{{ $.Chart.Name }}-{{ $.Chart.Version }}"
     app.kubernetes.io/name: {{ $.Chart.Name }}
@@ -39,16 +41,22 @@ spec:
             requests:
               cpu: 5m
               memory: 128Mi
-          # Custom bellow: 
+          # Custom bellow:
           env:
             - name: POSTGRES_DB
-              value: os2iot
-            - name: POSTGRES_PASSWORD
-              value: toi2so
-            - name: PGPASSWORD
-              value: toi2so
+              value: {{ .Values.POSTGRES_DB | default "os2iot" }}
             - name: POSTGRES_USER
-              value: os2iot
+              value: {{ .Values.POSTGRES_USER | default "os2iot" }}
+            - name: POSTGRES_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: {{ .Values.secretName | default "os2iot-secrets" }}
+                  key: POSTGRES_PASSWORD
+            - name: PGPASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: {{ .Values.secretName | default "os2iot-secrets" }}
+                  key: POSTGRES_PASSWORD
           readinessProbe:
             exec:
               command: ["psql", "-w", "-U", "os2iot", "-d", "os2iot", "-c", "SELECT 1"]

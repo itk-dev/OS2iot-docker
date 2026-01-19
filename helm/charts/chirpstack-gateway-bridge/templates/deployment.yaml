@@ -2,6 +2,8 @@ kind: Deployment
 apiVersion: apps/v1
 metadata:
   name: {{ $.Chart.Name }}
+  annotations:
+    argocd.argoproj.io/sync-wave: "6"
   labels:
     helm.sh/chart: "{{ $.Chart.Name }}-{{ $.Chart.Version }}"
     app.kubernetes.io/name: {{ $.Chart.Name }}
@@ -45,6 +47,18 @@ spec:
             - name: {{ $.Chart.Name }}-configmap
               mountPath: /etc/chirpstack-gateway-bridge/chirpstack-gateway-bridge.toml
               subPath: chirpstack-gateway-bridge.toml
+          readinessProbe:
+            exec:
+              command: ["chirpstack-gateway-bridge", "version"]
+            initialDelaySeconds: 5
+            periodSeconds: 30
+            timeoutSeconds: 5
+          livenessProbe:
+            exec:
+              command: ["chirpstack-gateway-bridge", "version"]
+            initialDelaySeconds: 15
+            periodSeconds: 60
+            timeoutSeconds: 5
       volumes:
         - name: "{{ $.Chart.Name }}-configmap"
           configMap:

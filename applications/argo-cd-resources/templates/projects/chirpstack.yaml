@@ -1,0 +1,21 @@
+apiVersion: argoproj.io/v1alpha1
+kind: AppProject
+metadata:
+  name: chirpstack
+  namespace: argo-cd
+spec:
+  description: ChirpStack LoRaWAN Network Server
+  destinations:
+    - name: in-cluster
+      namespace: chirpstack
+      server: https://kubernetes.default.svc
+  clusterResourceWhitelist:
+    - group: ''
+      kind: Namespace
+  namespaceResourceWhitelist:
+    - group: '*'
+      kind: '*'
+  orphanedResources:
+    warn: false
+  sourceRepos:
+    - {{ .Values.repoUrl }}

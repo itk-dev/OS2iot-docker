@@ -2,6 +2,8 @@ kind: Deployment
 apiVersion: apps/v1
 metadata:
   name: {{ $.Chart.Name }}
+  annotations:
+    argocd.argoproj.io/sync-wave: "2"
   labels:
     helm.sh/chart: "{{ $.Chart.Name }}-{{ $.Chart.Version }}"
     app.kubernetes.io/name: {{ $.Chart.Name }}
@@ -39,8 +41,20 @@ spec:
             requests:
               cpu: 5m
               memory: 128Mi
-          # Custom bellow: 
+          # Custom bellow:
           env:
             - name: ALLOW_ANONYMOUS_LOGIN
               value: "{{ $.Values.ALLOW_ANONYMOUS_LOGIN }}"
+          readinessProbe:
+            tcpSocket:
+              port: 2181
+            initialDelaySeconds: 5
+            periodSeconds: 10
+            timeoutSeconds: 5
+          livenessProbe:
+            tcpSocket:
+              port: 2181
+            initialDelaySeconds: 15
+            periodSeconds: 20
+            timeoutSeconds: 5
       restartPolicy: Always

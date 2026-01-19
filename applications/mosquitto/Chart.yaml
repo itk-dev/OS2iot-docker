@@ -1,0 +1,11 @@
+apiVersion: v2
+name: mosquitto
+version: 1.0.0
+description: MQTT Brokers for OS2IoT
+dependencies:
+  - name: mosquitto
+    version: "0.1.2"
+    repository: "file://../../helm/charts/mosquitto"
+  - name: mosquitto-os2iot
+    version: "0.1.2"
+    repository: "file://../../helm/charts/mosquitto-os2iot"

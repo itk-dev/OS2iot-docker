@@ -1,0 +1,11 @@
+apiVersion: v2
+name: chirpstack
+version: 1.0.0
+description: ChirpStack v4 LoRaWAN Network Server
+dependencies:
+  - name: chirpstack
+    version: "0.1.2"
+    repository: "file://../../helm/charts/chirpstack"
+  - name: chirpstack-gateway-bridge
+    version: "0.1.2"
+    repository: "file://../../helm/charts/chirpstack-gateway-bridge"

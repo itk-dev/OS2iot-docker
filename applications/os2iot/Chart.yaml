@@ -1,0 +1,30 @@
+apiVersion: v2
+name: os2iot
+version: 1.0.0
+description: OS2IoT Platform Stack
+dependencies:
+  # Core Application
+  - name: os2iot-backend
+    version: "0.1.2"
+    repository: "file://../../helm/charts/os2iot-backend"
+  - name: os2iot-frontend
+    version: "0.1.2"
+    repository: "file://../../helm/charts/os2iot-frontend"
+
+  # Database
+  - name: os2iot-postgres
+    version: "0.1.2"
+    repository: "file://../../helm/charts/os2iot-postgresql"
+
+  # Messaging
+  - name: os2iot-kafka
+    version: "0.1.2"
+    repository: "file://../../helm/charts/os2iot-kafka"
+  - name: os2iot-zookeeper
+    version: "0.1.2"
+    repository: "file://../../helm/charts/os2iot-zookeeper"
+
+  # Cache
+  - name: redis
+    version: "0.1.2"
+    repository: "file://../../helm/charts/redis"
