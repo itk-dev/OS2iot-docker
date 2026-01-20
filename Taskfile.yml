@@ -47,7 +47,7 @@ tasks:
       - |
         if command -v dos2unix &> /dev/null; then
           dos2unix configuration/os2iot-postgresql/initdb/*.sh 2>/dev/null || true
-          dos2unix configuration/postgresChirpstackV4/initdb/*.sh 2>/dev/null || true
+          dos2unix configuration/postgres/initdb/*.sh 2>/dev/null || true
           dos2unix configuration/postgresql/initdb/*.sh 2>/dev/null || true
           echo "Line endings fixed"
         else
