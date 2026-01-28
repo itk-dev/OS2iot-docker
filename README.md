@@ -166,18 +166,4 @@ You should now be able to restart the chirpstack server and the new adr algorith
 
 ### Helm
 
-When hosting via helm the steps are slightly different.
-
-1. Make sure that the persistent volume claim belonging to the chirpstack exists in your hosted setup.
-2. Find the actual name of the network-server pod. This can be done in a few ways. If you have a connection via a GUI like `Lens` it can be found under the `Pods` list. If you're hosting on an Azure Kubernetes service, it can be found under the side menu `Workloads -> Pods`
-3. Use `kubectl` to copy the module into the pod
-   ```bash
-   kubectl cp ./path/to/module/adr-module chirpstack-xxxxxxxxx-xxxxx:/etc/chirpstack/adr-modules
-   ```
-4. Update `configmap.yaml` located under `/helm/charts/chirpstack/templates` with the path to the plugin under `[network]`, like this:
-   ```toml
-   [network]
-       adr_plugins=["/etc/chirpstack/adr-modules/example-file.js"]
-   ```
-   The first line already exists
-5. Once the helm chart has redeployed restart the network server to enable the new module.
+See https://github.com/itk-dev/OS2IoT-helm
