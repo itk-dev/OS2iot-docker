@@ -58,6 +58,25 @@ task open
 - Email: `global-admin@os2iot.dk`
 - Password: `hunter2`
 
+#### ChirpStack Integration
+
+> [!NOTE]
+> The backend must be able to talk to ChirpStack to create new applications etc.
+
+```bash
+# Run the setup task - it will guide you through the process
+task setup:chirpstack
+```
+
+Or manually:
+
+1. Open ChirpStack UI: `task open:chirpstack`
+2. Login with `admin` / `admin`
+3. Go to **API Keys** → Create a new API key (`/#/api-keys/create`)
+4. Enter key name and press Submit.
+4. Add to `.env` file: `CHIRPSTACK_API_KEY=your-key-here`
+5. Restart the backend: `docker compose up --detach os2iot-backend`
+
 **Available tasks:**
 
 ```bash
@@ -71,23 +90,6 @@ task clean              # Remove containers, volumes, and images
 task open               # Open frontend in browser
 ```
 
-### ChirpStack Integration (Optional)
-
-If you're using LoRaWAN features, you need to configure the ChirpStack API key:
-
-```bash
-# Run the setup task - it will guide you through the process
-task setup:chirpstack
-```
-
-Or manually:
-1. Open ChirpStack UI: `task open:chirpstack`
-2. Login with `admin` / `admin`
-3. Go to **API Keys** → Create a new API key
-4. Add to `.env` file: `CHIRPSTACK_API_KEY=your-key-here`
-5. Restart backend: `docker compose up -d os2iot-backend`
-
-Without this configuration, you'll see `InvalidToken` errors in the backend logs - these can be ignored if you're not using LoRaWAN features.
 
 ## Configuration
 
