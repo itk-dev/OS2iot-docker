@@ -17,7 +17,6 @@ tasks:
     desc: Run all setup steps (clone repos, fix line endings, generate certs)
     cmds:
       - task: setup:clone-repos
-      - task: setup:fix-line-endings
       - task: setup:certs
       - task: setup:check
 
@@ -38,20 +37,6 @@ tasks:
           git clone https://github.com/OS2iot/OS2IoT-frontend.git "{{.FRONTEND_DIR}}"
         else
           echo "OS2IoT-frontend already exists"
-        fi
-
-  setup:fix-line-endings:
-    desc: Fix line endings on database init scripts (for Windows/cross-platform)
-    silent: true
-    cmds:
-      - |
-        if command -v dos2unix &> /dev/null; then
-          dos2unix configuration/os2iot-postgresql/initdb/*.sh 2>/dev/null || true
-          dos2unix configuration/postgres/initdb/*.sh 2>/dev/null || true
-          dos2unix configuration/postgresql/initdb/*.sh 2>/dev/null || true
-          echo "Line endings fixed"
-        else
-          echo "dos2unix not installed - skipping (install with: apt install dos2unix)"
         fi
 
   setup:certs:

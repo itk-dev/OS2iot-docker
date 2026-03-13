@@ -118,23 +118,6 @@ Docker doesn't have access to mount the volumes.
 Solution:
 On Windows: Go to Docker Desktop (tray icon) -> Settings -> Resources -> File Sharing -> Add the directory which is the parent directory of "OS2IoT-docker" or a parent of that. -> Apply & Restart
 
-### error: database "os2iot-e2e" does not exist
-
-```
-[ExceptionHandler] Unable
-to connect to the database. Retrying (1)...
-error: database "os2iot-e2e" does not exist
-    at Parser.parseErrorMessage
-```
-
-Cause:
-Database has not been setup correctly on local machine.
-
-Solution:
-docker compose down --volumes
-dos2unix configuration/os2iot-postgresql/initdb/*  # Run from git bash on Windows
-docker compose up
-
 ### error: Error: connect ETIMEDOUT xxx.xxx.xxx.xxx:xxxx at TCPConnectWrap.afterConnect [as oncomplete] (net.js:1141:16)
 
 Cause:
