@@ -63,12 +63,13 @@ task open
 > [!NOTE]
 > The backend must be able to talk to ChirpStack to create new applications etc.
 
+Run
+
 ```bash
-# Run the setup task - it will guide you through the process
 task setup:chirpstack
 ```
 
-Or manually:
+to generate and set an API key in `.env`, or do it manually:
 
 1. Open ChirpStack UI: `task open:chirpstack`
 2. Login with `admin` / `admin`

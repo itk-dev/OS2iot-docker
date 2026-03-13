@@ -116,28 +116,7 @@ tasks:
     silent: true
     cmds:
       - |
-        CHIRPSTACK_PORT=$(docker compose port chirpstack 8080 2>/dev/null | cut -d: -f2)
-        if [ -z "$CHIRPSTACK_PORT" ]; then
-          echo "✗ ChirpStack not running (run: docker compose up --detach)"
-          exit 1
-        fi
-        echo "=== ChirpStack API Key Setup ==="
-        echo ""
-        echo "1. Opening ChirpStack UI at http://localhost:${CHIRPSTACK_PORT}"
-        echo "2. Login with: admin / admin"
-        echo "3. Go to: API Keys (in the left menu)"
-        echo "4. Click 'Add API key'"
-        echo "5. Give it a name and click 'Submit'"
-        echo "6. Copy the generated token"
-        echo ""
-        # Try to open in browser
-        if command -v xdg-open &> /dev/null; then
-          xdg-open "http://localhost:${CHIRPSTACK_PORT}" 2>/dev/null &
-        elif command -v open &> /dev/null; then
-          open "http://localhost:${CHIRPSTACK_PORT}" 2>/dev/null &
-        fi
-        echo "Paste your API key here (or press Ctrl+C to cancel):"
-        read -r API_KEY
+        API_KEY=$(docker compose exec chirpstack chirpstack --config /etc/chirpstack/ create-api-key --name test-development | grep 'token: ' | sed 's/^[^:]*: *//')
         if [ -n "$API_KEY" ]; then
           if [ -f ".env" ]; then
             if grep -q "^CHIRPSTACK_API_KEY=" .env; then
