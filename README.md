@@ -91,6 +91,19 @@ task clean              # Remove containers, volumes, and images
 task open               # Open frontend in browser
 ```
 
+## Backend API
+
+Run
+
+``` shell
+task backend:api-key:create
+```
+
+to generate a backend API key. Use to fetch data:
+
+``` shell
+curl --header 'X-API-KEY: …' "http://$(docker compose port nginx 80)/api/v1/application"
+```
 
 ## Configuration
 
@@ -100,6 +113,10 @@ Edit the files in the configuration folder to adjust settings for each requireme
 
 - Postgres from the official image.
 - Chirpstack using their Docker Compose
+
+## Development
+
+See [Development](./Development.md) for some details on how to start the containers in development mode.
 
 ## Troubleshooting FAQ
 

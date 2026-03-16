@@ -161,7 +161,6 @@ services:
       - ./configuration/mosquitto-broker-os2iot/ca.key:/tmp/os2iot/backend/resources/ca.key
 
   os2iot-postgresql:
-    restart: always
     image: postgis/postgis # We need postgis to store geodata
     ports:
       - "5433"

@@ -1,0 +1,26 @@
+include:
+  - docker-compose.yml
+
+services:
+  os2iot-frontend:
+    ports:
+      - "8081:8081"
+    # https://mherman.org/blog/dockerizing-an-angular-app/
+    build:
+      dockerfile: "Dockerfile"
+    volumes:
+      - '../OS2IoT-frontend:/app'
+      - '/app/node_modules'
+
+  os2iot-backend:
+    ports:
+      - "3000:3000"
+    build:
+      target: dev
+    volumes:
+      - '../OS2IoT-backend:/app'
+      - '/app/node_modules'
+
+  nginx:
+    ports:
+      - "8888:80"
