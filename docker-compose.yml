@@ -155,10 +155,10 @@ services:
       MQTT_SUPER_USER_PASSWORD: ${MQTT_SUPER_USER_PASSWORD:-super_user_password}
       CHIRPSTACK_API_KEY: ${CHIRPSTACK_API_KEY:-} # Create in ChirpStack UI: http://localhost:8080 -> API Keys
     volumes:
-      - ./configuration/mosquitto-broker-os2iot/ca.crt:/tmp/os2iot/backend/dist/resources/ca.crt
-      - ./configuration/mosquitto-broker-os2iot/ca.key:/tmp/os2iot/backend/dist/resources/ca.key
-      - ./configuration/mosquitto-broker-os2iot/ca.crt:/tmp/os2iot/backend/resources/ca.crt
-      - ./configuration/mosquitto-broker-os2iot/ca.key:/tmp/os2iot/backend/resources/ca.key
+      - ./configuration/mosquitto-broker-os2iot/ca.crt:/app/dist/resources/ca.crt
+      - ./configuration/mosquitto-broker-os2iot/ca.key:/app/dist/resources/ca.key
+      - ./configuration/mosquitto-broker-os2iot/ca.crt:/app/resources/ca.crt
+      - ./configuration/mosquitto-broker-os2iot/ca.key:/app/resources/ca.key
 
   os2iot-postgresql:
     image: postgis/postgis # We need postgis to store geodata
