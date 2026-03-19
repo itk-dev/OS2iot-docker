@@ -17,8 +17,6 @@ Nginx now exposes the frontend on <http://127.0.0.1:8888/> and the backend (API)
 > You may have to wait quite a while until everything is up and running. And you may have to reload in your browser a
 > couple of times …
 
-The frontend is also exposed (bypassing nginx) on <http://0.0.0.0:8081> and the backend on <http://0.0.0.0:3000>.
-
 Check the status development services:
 
 ``` shell

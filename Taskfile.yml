@@ -196,10 +196,19 @@ tasks:
           echo "✗ Failed to login - ensure services are running"
           exit 1
         fi
+
+        # Permissions
+        #
+        #  id |                       name
+        # ----+---------------------------------------------------
+        #   2 | Default Organization - Læserettigheder
+        #   3 | Default Organization - Applikationsadministrator
+        #   4 | Default Organization - Organisationsadministrator
+
         RESULT=$(curl -s -X POST "http://localhost:${NGINX_PORT}/api/v1/api-key" \
           -H "Authorization: Bearer $TOKEN" \
           -H "Content-Type: application/json" \
-          -d '{"name":"test-development", "expiresOn": "2100-01-01T00:00:00Z", "permissionIds": [ 2 ]}')
+          -d '{"name":"test-development", "expiresOn": "2100-01-01T00:00:00Z", "permissionIds": [ 2, 3, 4 ]}')
         if echo "$RESULT" | grep -q '"key"'; then
           API_KEY=$(echo "$RESULT" | jq --raw-output '.key')
           echo "✓ API key:"
@@ -244,4 +253,8 @@ tasks:
   dev:compose:
     desc: Start containers in development mode
     cmds:
-      - docker compose --file docker-compose.development.yml {{.TASK_ARGS}} {{.CLI_ARGS}}
+      - docker compose {{range .COMPOSE_FILES}} --file {{.}}{{end}} {{.TASK_ARGS}} {{.CLI_ARGS}}
+    vars:
+        COMPOSE_FILES:
+            - docker-compose.yml
+            - docker-compose.development.yml
