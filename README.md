@@ -166,4 +166,4 @@ You should now be able to restart the chirpstack server and the new adr algorith
 
 ### Helm
 
-See https://github.com/itk-dev/OS2IoT-helm
+See <https://github.com/OS2iot/demo-site-helm> for an example Helm setup.
