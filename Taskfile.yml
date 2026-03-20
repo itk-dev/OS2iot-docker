@@ -17,7 +17,6 @@ tasks:
     desc: Run all setup steps (clone repos, fix line endings, generate certs)
     cmds:
       - task: setup:clone-repos
-      - task: setup:fix-line-endings
       - task: setup:certs
       - task: setup:check
 
@@ -38,20 +37,6 @@ tasks:
           git clone https://github.com/OS2iot/OS2IoT-frontend.git "{{.FRONTEND_DIR}}"
         else
           echo "OS2IoT-frontend already exists"
-        fi
-
-  setup:fix-line-endings:
-    desc: Fix line endings on database init scripts (for Windows/cross-platform)
-    silent: true
-    cmds:
-      - |
-        if command -v dos2unix &> /dev/null; then
-          dos2unix configuration/os2iot-postgresql/initdb/*.sh 2>/dev/null || true
-          dos2unix configuration/postgres/initdb/*.sh 2>/dev/null || true
-          dos2unix configuration/postgresql/initdb/*.sh 2>/dev/null || true
-          echo "Line endings fixed"
-        else
-          echo "dos2unix not installed - skipping (install with: apt install dos2unix)"
         fi
 
   setup:certs:
@@ -111,7 +96,7 @@ tasks:
         fi
         TOKEN=$(curl -s -X POST "http://localhost:${NGINX_PORT}/api/v1/auth/login" \
           -H "Content-Type: application/json" \
-          -d '{"username":"global-admin@os2iot.dk","password":"hunter2"}' | jq -r '.accessToken')
+          -d '{"username":"global-admin@os2iot.dk","password":"hunter2"}' | docker run -i --rm ghcr.io/jqlang/jq -r '.accessToken')
         if [ "$TOKEN" = "null" ] || [ -z "$TOKEN" ]; then
           echo "✗ Failed to login - ensure services are running"
           exit 1
@@ -131,28 +116,7 @@ tasks:
     silent: true
     cmds:
       - |
-        CHIRPSTACK_PORT=$(docker compose port chirpstack 8080 2>/dev/null | cut -d: -f2)
-        if [ -z "$CHIRPSTACK_PORT" ]; then
-          echo "✗ ChirpStack not running (run: docker compose up --detach)"
-          exit 1
-        fi
-        echo "=== ChirpStack API Key Setup ==="
-        echo ""
-        echo "1. Opening ChirpStack UI at http://localhost:${CHIRPSTACK_PORT}"
-        echo "2. Login with: admin / admin"
-        echo "3. Go to: API Keys (in the left menu)"
-        echo "4. Click 'Add API key'"
-        echo "5. Give it a name and click 'Submit'"
-        echo "6. Copy the generated token"
-        echo ""
-        # Try to open in browser
-        if command -v xdg-open &> /dev/null; then
-          xdg-open "http://localhost:${CHIRPSTACK_PORT}" 2>/dev/null &
-        elif command -v open &> /dev/null; then
-          open "http://localhost:${CHIRPSTACK_PORT}" 2>/dev/null &
-        fi
-        echo "Paste your API key here (or press Ctrl+C to cancel):"
-        read -r API_KEY
+        API_KEY=$(docker compose exec chirpstack chirpstack --config /etc/chirpstack/ create-api-key --name test-development | grep 'token: ' | sed 's/^[^:]*: *//')
         if [ -n "$API_KEY" ]; then
           if [ -f ".env" ]; then
             if grep -q "^CHIRPSTACK_API_KEY=" .env; then
@@ -214,3 +178,83 @@ tasks:
         else
           echo "Open in browser: $URL"
         fi
+
+  backend:api-key:create:
+    desc: Create backend API key
+    silent: true
+    cmds:
+      - |
+        NGINX_PORT=$(docker compose port nginx 80 | cut -d: -f2)
+        if [ -z "$NGINX_PORT" ]; then
+          echo "✗ Services not running (run: docker compose up --detach)"
+          exit 1
+        fi
+        TOKEN=$(curl -s -X POST "http://localhost:${NGINX_PORT}/api/v1/auth/login" \
+          -H "Content-Type: application/json" \
+          -d '{"username":"global-admin@os2iot.dk","password":"hunter2"}' | docker run -i --rm ghcr.io/jqlang/jq -r '.accessToken')
+        if [ "$TOKEN" = "null" ] || [ -z "$TOKEN" ]; then
+          echo "✗ Failed to login - ensure services are running"
+          exit 1
+        fi
+
+        # Permissions
+        #
+        #  id |                       name
+        # ----+---------------------------------------------------
+        #   2 | Default Organization - Læserettigheder
+        #   3 | Default Organization - Applikationsadministrator
+        #   4 | Default Organization - Organisationsadministrator
+
+        RESULT=$(curl -s -X POST "http://localhost:${NGINX_PORT}/api/v1/api-key" \
+          -H "Authorization: Bearer $TOKEN" \
+          -H "Content-Type: application/json" \
+          -d '{"name":"test-development", "expiresOn": "2100-01-01T00:00:00Z", "permissionIds": [ 2, 3, 4 ]}')
+        if echo "$RESULT" | grep -q '"key"'; then
+          API_KEY=$(echo "$RESULT" | docker run -i --rm ghcr.io/jqlang/jq --raw-output '.key')
+          echo "✓ API key:"
+          echo
+          echo "$API_KEY"
+        else
+          echo "Error creating API key: $RESULT"
+        fi
+
+  dev:start:
+    desc: Start containers in development mode
+    cmds:
+      - task: dev:compose
+        vars:
+          TASK_ARGS: up --build --detach --wait
+
+  dev:stop:
+    desc: Stop containers in development mode
+    cmds:
+      - task: dev:compose
+        vars:
+          TASK_ARGS: stop
+
+  dev:status:
+    desc: Show status of development containers
+    cmds:
+        # We use `printf` to escape having Task processing the placeholders.
+        - docker compose --file docker-compose.development.yml ps os2iot-frontend  os2iot-backend --format '{{printf "{{.Image}} {{.State}}\t{{.Status}}"}}'
+
+  dev:log:
+    desc: "Follow development container log; examples: `task {{.TASK}} SERVICE=frontend` or `task {{.TASK}} --interactive`"
+    # https://taskfile.dev/blog/if-and-variable-prompt#prompt-for-required-variables
+    requires:
+      vars:
+        - name: SERVICE
+          enum: [frontend, backend]
+    cmds:
+      - task: dev:compose
+        vars:
+          TASK_ARGS: logs --follow os2iot-{{.SERVICE}}
+
+  dev:compose:
+    desc: Start containers in development mode
+    cmds:
+      - docker compose {{range .COMPOSE_FILES}} --file {{.}}{{end}} {{.TASK_ARGS}} {{.CLI_ARGS}}
+    vars:
+        COMPOSE_FILES:
+            - docker-compose.yml
+            - docker-compose.development.yml

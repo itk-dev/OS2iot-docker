@@ -1,0 +1,4 @@
+# PostgreSQL init script must use LF as line endings
+# Run `git ls-files --eol` to view applied attributes
+configuration/os2iot-postgresql/initdb/*.sh text eol=lf
+configuration/postgres/initdb/*.sh          text eol=lf

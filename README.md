@@ -58,6 +58,26 @@ task open
 - Email: `global-admin@os2iot.dk`
 - Password: `hunter2`
 
+#### ChirpStack Integration
+
+> [!NOTE]
+> The backend must be able to talk to ChirpStack to create new applications etc.
+
+Run
+
+```bash
+task setup:chirpstack
+```
+
+to generate and set an API key in `.env`, or do it manually:
+
+1. Open ChirpStack UI: `task open:chirpstack`
+2. Login with `admin` / `admin`
+3. Go to **API Keys** → Create a new API key (`/#/api-keys/create`)
+4. Enter key name and press Submit.
+4. Add to `.env` file: `CHIRPSTACK_API_KEY=your-key-here`
+5. Restart the backend: `docker compose up --detach os2iot-backend`
+
 **Available tasks:**
 
 ```bash
@@ -71,23 +91,19 @@ task clean              # Remove containers, volumes, and images
 task open               # Open frontend in browser
 ```
 
-### ChirpStack Integration (Optional)
+## Backend API
 
-If you're using LoRaWAN features, you need to configure the ChirpStack API key:
+Run
 
-```bash
-# Run the setup task - it will guide you through the process
-task setup:chirpstack
+``` shell
+task backend:api-key:create
 ```
 
-Or manually:
-1. Open ChirpStack UI: `task open:chirpstack`
-2. Login with `admin` / `admin`
-3. Go to **API Keys** → Create a new API key
-4. Add to `.env` file: `CHIRPSTACK_API_KEY=your-key-here`
-5. Restart backend: `docker compose up -d os2iot-backend`
+to generate a backend API key. Use to fetch data:
 
-Without this configuration, you'll see `InvalidToken` errors in the backend logs - these can be ignored if you're not using LoRaWAN features.
+``` shell
+curl --header 'X-API-KEY: …' "http://$(docker compose port nginx 80)/api/v1/application"
+```
 
 ## Configuration
 
@@ -97,6 +113,10 @@ Edit the files in the configuration folder to adjust settings for each requireme
 
 - Postgres from the official image.
 - Chirpstack using their Docker Compose
+
+## Development
+
+See [Development](./Development.md) for some details on how to start the containers in development mode.
 
 ## Troubleshooting FAQ
 
@@ -115,23 +135,6 @@ Docker doesn't have access to mount the volumes.
 
 Solution:
 On Windows: Go to Docker Desktop (tray icon) -> Settings -> Resources -> File Sharing -> Add the directory which is the parent directory of "OS2IoT-docker" or a parent of that. -> Apply & Restart
-
-### error: database "os2iot-e2e" does not exist
-
-```
-[ExceptionHandler] Unable
-to connect to the database. Retrying (1)...
-error: database "os2iot-e2e" does not exist
-    at Parser.parseErrorMessage
-```
-
-Cause:
-Database has not been setup correctly on local machine.
-
-Solution:
-docker compose down --volumes
-dos2unix configuration/os2iot-postgresql/initdb/*  # Run from git bash on Windows
-docker compose up
 
 ### error: Error: connect ETIMEDOUT xxx.xxx.xxx.xxx:xxxx at TCPConnectWrap.afterConnect [as oncomplete] (net.js:1141:16)
 

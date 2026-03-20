@@ -1,4 +1,6 @@
 .idea/
+.env
+ca.srl
 ca.crt
 ca.key
 server.crt

@@ -1,0 +1,19 @@
+services:
+  os2iot-frontend:
+    # https://mherman.org/blog/dockerizing-an-angular-app/
+    build:
+      dockerfile: "Dockerfile"
+    volumes:
+      - '../OS2IoT-frontend:/app'
+      - '/app/node_modules'
+
+  os2iot-backend:
+    build:
+      target: dev
+    volumes:
+      - '../OS2IoT-backend:/app'
+      - '/app/node_modules'
+
+  nginx:
+    ports:
+      - "8888:80"
